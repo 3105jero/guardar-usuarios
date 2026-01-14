@@ -25,8 +25,11 @@
         }
 
         .table-container {
-            min-height: 420px;
+            min-height: 420px;     
+            max-height: 420px;      
+            overflow-y: auto;       
         }
+
 
         .table thead th {
             font-weight: 600;
