@@ -69,6 +69,8 @@ boton.addEventListener("click", function () {
             correoInput.value = fila.children[3].textContent;
 
             fila.remove();
+            id--;
+            
 
             Swal.fire("Editar", "Modifica los datos y presiona Guardar", "info");
         });
