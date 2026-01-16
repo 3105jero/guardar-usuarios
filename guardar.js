@@ -1,113 +1,112 @@
 let boton = document.getElementById("button");
 let namesInput = document.getElementById("names");
 let lastnamesInput = document.getElementById("lastnames");
-let tableBody = document.getElementById("tableBody");
 let correoInput = document.getElementById("correo");
+let tableBody = document.getElementById("tableBody");
 
-
+// ================== DATOS ==================
+let usuarios = [];
 let id = 1;
+let filaEditando = null;
 
+// ================== GUARDAR ==================
 boton.addEventListener("click", function () {
     let nombre = namesInput.value.trim();
     let apellido = lastnamesInput.value.trim();
     let correo = correoInput.value.trim();
 
-    if (nombre !== "" && apellido !== "" && correo !== "") {
+    if (nombre === "" || apellido === "" || correo === "") {
+        Swal.fire("Error", "Completa todos los campos", "error");
+        return;
+    }
 
-        // Validación visual
-        namesInput.classList.add("is-valid");
-        namesInput.classList.remove("is-invalid");
-        lastnamesInput.classList.add("is-valid");
-        lastnamesInput.classList.remove("is-invalid");
-        correoInput.classList.add("is-valid");
-        correoInput.classList.remove("is-invalid");
-        Swal.fire("Perfecto", "Completaste todos los campos", "success");
+    // ================== EDITAR ==================
+    if (filaEditando) {
+        let idEditando = Number(filaEditando.children[0].textContent);
 
-        // Crear fila
+        let usuario = usuarios.find(u => u.id === idEditando);
+        usuario.nombre = nombre;
+        usuario.apellido = apellido;
+        usuario.correo = correo;
+
+        filaEditando.children[1].textContent = nombre;
+        filaEditando.children[2].textContent = apellido;
+        filaEditando.children[3].textContent = correo;
+
+        filaEditando = null;
+
+        Swal.fire("Actualizado", "Usuario editado correctamente", "success");
+    } 
+    // ================== NUEVO ==================
+    else {
+        let usuario = {
+            id: id,
+            nombre: nombre,
+            apellido: apellido,
+            correo: correo
+        };
+
+        usuarios.push(usuario);
+
         let fila = document.createElement("tr");
-
         fila.innerHTML = `
-            <td>${id}</td>
-            <td>${nombre}</td>
-            <td>${apellido}</td>
-            <td>${correo}</td>
-            
-        <td>
-            <button class="btn btn-info btn-sm ver">Ver</button>
-            <button class="btn btn-warning btn-sm editar">Editar</button>
-            <button class="btn btn-danger btn-sm eliminar">Eliminar</button>
-        </td>
+            <td>${usuario.id}</td>
+            <td>${usuario.nombre}</td>
+            <td>${usuario.apellido}</td>
+            <td>${usuario.correo}</td>
+            <td>
+                <button class="btn btn-info btn-sm ver">Ver</button>
+                <button class="btn btn-warning btn-sm editar">Editar</button>
+                <button class="btn btn-danger btn-sm eliminar">Eliminar</button>
+            </td>
+        `;
 
-             `;
-        namesInput.classList.remove('is-valid')
-        lastnamesInput.classList.remove('is-valid')
-        correoInput.classList.remove('is-valid')
-
-        tableBody.appendChild(fila);
-
-        id++;
-
-
-         // ================== ACCIÓN VER ==================
-        fila.querySelector(".ver").addEventListener("click", function () {
+        // VER
+        fila.querySelector(".ver").addEventListener("click", () => {
             Swal.fire({
-                title: "Información del usuario",
+                title: "Información",
                 html: `
-                    <strong>Nombre:</strong> ${fila.children[1].textContent}<br>
-                    <strong>Apellido:</strong> ${fila.children[2].textContent}<br>
-                    <strong>Correo:</strong> ${fila.children[3].textContent}
+                    <b>Nombre:</b> ${usuario.nombre}<br>
+                    <b>Apellido:</b> ${usuario.apellido}<br>
+                    <b>Correo:</b> ${usuario.correo}
                 `,
                 icon: "info"
             });
         });
 
-
-    // ================== ACCIÓN EDITAR ==================
-        fila.querySelector(".editar").addEventListener("click", function () {
-            namesInput.value = fila.children[1].textContent;
-            lastnamesInput.value = fila.children[2].textContent;
-            correoInput.value = fila.children[3].textContent;
-
-            fila.remove();
-            id--;
-            
-
-            Swal.fire("Editar", "Modifica los datos y presiona Guardar", "info");
+        // EDITAR
+        fila.querySelector(".editar").addEventListener("click", () => {
+            filaEditando = fila;
+            namesInput.value = usuario.nombre;
+            lastnamesInput.value = usuario.apellido;
+            correoInput.value = usuario.correo;
         });
 
-
-        // Botón eliminar
-        fila.querySelector(".eliminar").addEventListener("click", function () {
+        // ELIMINAR
+        fila.querySelector(".eliminar").addEventListener("click", () => {
             Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Este usuario será eliminado",
+                title: "¿Eliminar?",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Sí, eliminar",
-                cancelButtonText: "Cancelar"
-            }).then((result) => {
+                confirmButtonText: "Sí",
+                cancelButtonText: "No"
+            }).then(result => {
                 if (result.isConfirmed) {
+                    usuarios = usuarios.filter(u => u.id !== usuario.id);
                     fila.remove();
-                    Swal.fire("Eliminado", "El usuario fue eliminado", "success");
+                    console.log(usuarios);
                 }
             });
         });
 
-        // Limpiar inputs
-        namesInput.value = "";
-        lastnamesInput.value = "";
-        correoInput.value = "";
-
-    } else {
-
-        namesInput.classList.add("is-invalid");
-        namesInput.classList.remove("is-valid");
-        lastnamesInput.classList.add("is-invalid");
-        lastnamesInput.classList.remove("is-valid");
-        correoInput.classList.add("is-invalid");
-        correoInput.classList.remove("is-valid");
-
-
-        Swal.fire("Error", "Completa todos los campos", "error");
+        tableBody.appendChild(fila);
+        id++;
     }
+
+    console.log(usuarios);
+
+    // LIMPIAR
+    namesInput.value = "";
+    lastnamesInput.value = "";
+    correoInput.value = "";
 });
